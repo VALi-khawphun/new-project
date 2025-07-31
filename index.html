@@ -1,1 +1,186 @@
 
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แบบฟอร์มเก็บข้อมูลเกม</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            min-height: 100vh;
+            font-family: 'Prompt', sans-serif;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap');
+    </style>
+</head>
+<body class="flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-xl p-8 w-full max-w-md">
+        <h1 class="text-2xl font-bold text-center mb-6 text-indigo-700">แบบฟอร์มข้อมูลเกม</h1>
+        
+        <form id="gameForm" class="space-y-6">
+            <div>
+                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">ชื่อของคุณ</label>
+                <input type="text" id="name" name="name" required 
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+            
+            <div>
+                <label for="gameName" class="block text-sm font-medium text-gray-700 mb-1">ชื่อเกม</label>
+                <input type="text" id="gameName" name="gameName" required 
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">ประเภทเกมที่ชอบ</label>
+                <div class="grid grid-cols-2 gap-2">
+                    <label class="flex items-center space-x-2 p-2 border border-gray-200 rounded-lg hover:bg-indigo-50">
+                        <input type="radio" name="gameType" value="Action" required class="text-indigo-600">
+                        <span>Action</span>
+                    </label>
+                    <label class="flex items-center space-x-2 p-2 border border-gray-200 rounded-lg hover:bg-indigo-50">
+                        <input type="radio" name="gameType" value="Adventure" class="text-indigo-600">
+                        <span>Adventure</span>
+                    </label>
+                    <label class="flex items-center space-x-2 p-2 border border-gray-200 rounded-lg hover:bg-indigo-50">
+                        <input type="radio" name="gameType" value="RPG" class="text-indigo-600">
+                        <span>RPG</span>
+                    </label>
+                    <label class="flex items-center space-x-2 p-2 border border-gray-200 rounded-lg hover:bg-indigo-50">
+                        <input type="radio" name="gameType" value="Strategy" class="text-indigo-600">
+                        <span>Strategy</span>
+                    </label>
+                    <label class="flex items-center space-x-2 p-2 border border-gray-200 rounded-lg hover:bg-indigo-50">
+                        <input type="radio" name="gameType" value="Simulation" class="text-indigo-600">
+                        <span>Simulation</span>
+                    </label>
+                    <label class="flex items-center space-x-2 p-2 border border-gray-200 rounded-lg hover:bg-indigo-50">
+                        <input type="radio" name="gameType" value="Sports" class="text-indigo-600">
+                        <span>Sports</span>
+                    </label>
+                </div>
+            </div>
+            
+            <button type="submit" 
+                class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-4 rounded-lg transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">
+                บันทึกข้อมูล
+            </button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('gameForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const name = document.getElementById('name').value;
+            const gameName = document.getElementById('gameName').value;
+            const gameTypeElements = document.getElementsByName('gameType');
+            let gameType = '';
+            
+            for (let i = 0; i < gameTypeElements.length; i++) {
+                if (gameTypeElements[i].checked) {
+                    gameType = gameTypeElements[i].value;
+                    break;
+                }
+            }
+            
+            // Validate form
+            if (!name || !gameName || !gameType) {
+                Swal.fire({
+                    title: 'ข้อมูลไม่ครบถ้วน',
+                    text: 'กรุณากรอกข้อมูลให้ครบทุกช่อง',
+                    icon: 'error',
+                    confirmButtonText: 'ตกลง',
+                    confirmButtonColor: '#4f46e5'
+                });
+                return;
+            }
+            
+            // Show loading alert
+            Swal.fire({
+                title: 'กำลังบันทึกข้อมูล',
+                text: 'โปรดรอสักครู่...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            // Create data object
+            const data = {
+                name: name,
+                gameName: gameName,
+                gameType: gameType
+            };
+            
+            // Create a unique callback name
+            const callbackName = 'jsonpCallback_' + new Date().getTime();
+            
+            // Create global callback function
+            window[callbackName] = function(response) {
+                // Hide loading and show success message
+                if (response.result === 'success') {
+                    Swal.fire({
+                        title: 'บันทึกสำเร็จ!',
+                        text: 'ข้อมูลของคุณถูกบันทึกเรียบร้อยแล้ว',
+                        icon: 'success',
+                        confirmButtonText: 'ตกลง',
+                        confirmButtonColor: '#4f46e5'
+                    }).then(() => {
+                        // Reset form
+                        document.getElementById('gameForm').reset();
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'เกิดข้อผิดพลาด',
+                        text: 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง',
+                        icon: 'error',
+                        confirmButtonText: 'ตกลง',
+                        confirmButtonColor: '#4f46e5'
+                    });
+                }
+                
+                // Clean up the callback function
+                delete window[callbackName];
+                
+                // Remove the script tag
+                const scriptElement = document.getElementById('jsonpScript');
+                if (scriptElement) {
+                    document.body.removeChild(scriptElement);
+                }
+            };
+            
+            // Create the URL with parameters
+            const url = `https://script.google.com/macros/s/AKfycbwRlmpxF_FruYet5Z5TM8wj2xJjWzh01h4Jkl1fnwiwE8IMxyWJo35DHCA9NV1U-BGJ/exec?callback=${callbackName}&name=${encodeURIComponent(data.name)}&gameName=${encodeURIComponent(data.gameName)}&gameType=${encodeURIComponent(data.gameType)}`;
+            
+            // Create script element for JSONP request
+            const script = document.createElement('script');
+            script.id = 'jsonpScript';
+            script.src = url;
+            
+            // Handle errors
+            script.onerror = function() {
+                Swal.fire({
+                    title: 'เกิดข้อผิดพลาด',
+                    text: 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง',
+                    icon: 'error',
+                    confirmButtonText: 'ตกลง',
+                    confirmButtonColor: '#4f46e5'
+                });
+                
+                // Clean up
+                delete window[callbackName];
+                document.body.removeChild(script);
+            };
+            
+            // Add script to document to start the request
+            document.body.appendChild(script);
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'967bad7f36177325',t:'MTc1Mzk1MDAzOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
+
